@@ -56,12 +56,40 @@ public class TaskView extends Application {
             }
         });
 
+        editButton.setOnAction(e -> {
+            String selected = taskList.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                TextInputDialog dialog = new TextInputDialog(selected);
+                dialog.setTitle("Editar Tarefa");
+                dialog.setHeaderText(null);
+                dialog.setContentText("Nova descrição");
+
+                dialog.showAndWait().ifPresent(newDesc -> {
+                    int index = taskList.getSelectionModel().getSelectedIndex();
+                    Task task = controller.getAllTasks().get(index);
+                    controller.updateTask(task.getId(), newDesc);
+                    taskList.getItems().set(index, newDesc);
+                });
+            }
+        });
+
+        deleteButton.setOnAction(e -> {
+            int index = taskList.getSelectionModel().getSelectedIndex();
+            if (index >=0) {
+                Task task = controller.getAllTasks().get(index);
+                controller.deleteTask(task.getId());
+                taskList.getItems().remove(index);
+            }
+        });
+
         // Adiciona todos os elementos ao layout
         root.getChildren().addAll(
                 new Label("Nova tarefa:"),
                 taskInput,
                 addButton,
                 completeButton,
+                editButton,
+                deleteButton,
                 taskList
         );
 
