@@ -23,7 +23,9 @@ public class TaskView extends Application {
         Button completeButton = new Button("Marcar como concluída");
         Button editButton = new Button("Editar");
         Button deleteButton = new Button("Excluir");
+        Button markInProgressButton = new Button("Marcar como em andamento");
         ListView<String> taskList = new ListView<>(); // Lista visual das tarefas
+
 
         // Define o que acontece ao clicar no botão
         addButton.setOnAction(e -> {
@@ -40,7 +42,7 @@ public class TaskView extends Application {
 
 
                 controller.addTask(task); // Adiciona a tarefa no controlador
-                taskList.getItems().add(task.getDescription()); // Atualiza a interface
+                updateTaskList(taskList); // Atualiza a interface
                 taskInput.clear(); // Limpa o campo de texto
 
             }
@@ -67,7 +69,7 @@ public class TaskView extends Application {
                 dialog.showAndWait().ifPresent(newDesc -> {
                     int index = taskList.getSelectionModel().getSelectedIndex();
                     Task task = controller.getAllTasks().get(index);
-                    controller.updateTask(task.getId(), newDesc);
+                    controller.updateTask(task);
                     taskList.getItems().set(index, newDesc);
                 });
             }
@@ -82,11 +84,21 @@ public class TaskView extends Application {
             }
         });
 
+        markInProgressButton.setOnAction(e -> {
+            int selectedIndex = taskList.getSelectionModel().getSelectedIndex();
+            if (selectedIndex != -1) {
+                Task task = controller.getAllTasks().get(selectedIndex);
+                controller.markInProgress(task.getId());
+                updateTaskList(taskList);
+            }
+        });
+
         // Adiciona todos os elementos ao layout
         root.getChildren().addAll(
                 new Label("Nova tarefa:"),
                 taskInput,
                 addButton,
+                markInProgressButton,
                 completeButton,
                 editButton,
                 deleteButton,
@@ -101,6 +113,24 @@ public class TaskView extends Application {
         primaryStage.show();
 
 
+    }
+
+    private void updateTaskList(ListView<String> taskList) {
+        taskList.getItems().clear();
+        for (Task task : controller.getAllTasks()) {
+            taskList.getItems().add(formatTask(task));
+        }
+    }
+
+    private String formatTask(Task task) {
+        String icon = switch (task.getStatus()) {
+            case "todo" -> "📝";
+            case "in-progress" -> "🔄";
+            case "done" -> "✔️";
+            default -> "❓";
+        };
+
+        return icon + " " + task.getDescription();
     }
 
 

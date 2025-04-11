@@ -27,11 +27,20 @@ public class TaskController {
         }
     }
 
-    public void updateTask(int id, String newDescription) {
+    public void markInProgress(int id) {
         for (Task task : tasks) {
             if (task.getId() == id) {
-                task.setDescription(newDescription);
+                task.setStatus("in-progress");
                 task.setUpdatedAt(LocalDateTime.now());
+                break;
+            }
+        }
+    }
+
+    public void updateTask(Task updatedTask) {
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).getId() == updatedTask.getId()) {
+                tasks.set(i, updatedTask);
                 break;
             }
         }
