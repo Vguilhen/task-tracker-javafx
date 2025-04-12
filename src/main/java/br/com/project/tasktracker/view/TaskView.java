@@ -9,6 +9,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class TaskView extends Application {
 
@@ -24,6 +27,9 @@ public class TaskView extends Application {
         Button editButton = new Button("Editar");
         Button deleteButton = new Button("Excluir");
         Button markInProgressButton = new Button("Marcar como em andamento");
+        ComboBox<String> sortBox = new ComboBox<>();
+        sortBox.getItems().addAll("Data de criação", "Última edição");
+        sortBox.setValue("Data de criação");
         ListView<String> taskList = new ListView<>(); // Lista visual das tarefas
 
 
@@ -42,7 +48,7 @@ public class TaskView extends Application {
 
 
                 controller.addTask(task); // Adiciona a tarefa no controlador
-                updateTaskList(taskList); // Atualiza a interface
+                updateTaskList(taskList, sortBox.getValue()); // Atualiza a interface
                 taskInput.clear(); // Limpa o campo de texto
 
             }
@@ -77,7 +83,7 @@ public class TaskView extends Application {
 
         deleteButton.setOnAction(e -> {
             int index = taskList.getSelectionModel().getSelectedIndex();
-            if (index >=0) {
+            if (index >= 0) {
                 Task task = controller.getAllTasks().get(index);
                 controller.deleteTask(task.getId());
                 taskList.getItems().remove(index);
@@ -89,19 +95,23 @@ public class TaskView extends Application {
             if (selectedIndex != -1) {
                 Task task = controller.getAllTasks().get(selectedIndex);
                 controller.markInProgress(task.getId());
-                updateTaskList(taskList);
+                updateTaskList(taskList, sortBox.getValue());
             }
         });
+
+        sortBox.setOnAction(e -> updateTaskList(taskList, sortBox.getValue()));
 
         // Adiciona todos os elementos ao layout
         root.getChildren().addAll(
                 new Label("Nova tarefa:"),
+                new Label("Ordenar por:"),
                 taskInput,
                 addButton,
                 markInProgressButton,
                 completeButton,
                 editButton,
                 deleteButton,
+                sortBox,
                 taskList
         );
 
@@ -115,9 +125,17 @@ public class TaskView extends Application {
 
     }
 
-    private void updateTaskList(ListView<String> taskList) {
+    private void updateTaskList(ListView<String> taskList, String sortBy) {
         taskList.getItems().clear();
-        for (Task task : controller.getAllTasks()) {
+
+        List<Task> sortdTasks = new ArrayList<>(controller.getAllTasks());
+
+        if (sortBy.equals("Data de criação")) {
+            sortdTasks.sort(Comparator.comparing(Task::getCreatedAt));
+        } else if (sortBy.equals("Última edição")) {
+            sortdTasks.sort(Comparator.comparing(Task::getUpdatedAt).reversed());
+        }
+        for (Task task : sortdTasks) {
             taskList.getItems().add(formatTask(task));
         }
     }
@@ -130,7 +148,13 @@ public class TaskView extends Application {
             default -> "❓";
         };
 
-        return icon + " " + task.getDescription();
+        return String.format(
+                "%s %s\nCriado: %s | Editado: %s,",
+                icon,
+                task.getDescription(),
+                task.getCreatedAt().toLocalDate(),
+                task.getUpdatedAt().toLocalDate()
+        );
     }
 
 
