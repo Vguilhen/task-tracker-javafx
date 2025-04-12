@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -150,12 +151,14 @@ public class TaskView extends Application {
             default -> "❓";
         };
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%s %s,", icon, task.getDescription()));
-        sb.append(String.format("\nCriado: %s", task.getCreatedAt().toLocalDate()));
+        sb.append(String.format("\nCriado: %s", task.getCreatedAt().format(formatter)));
 
         if (!task.getCreatedAt().equals(task.getUpdatedAt())) {
-            sb.append(String.format(" | Editado: %s", task.getUpdatedAt().toLocalDate()));
+            sb.append(String.format(" | Editado: %s", task.getUpdatedAt().format(formatter)));
         }
 
         return sb.toString();
