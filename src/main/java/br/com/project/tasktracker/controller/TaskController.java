@@ -21,7 +21,6 @@ public class TaskController {
         for (Task task : tasks) {
             if (task.getId() == taskId) {
                 task.setStatus("done");
-                task.setUpdatedAt(LocalDateTime.now());
                 break;
             }
         }
@@ -31,7 +30,6 @@ public class TaskController {
         for (Task task : tasks) {
             if (task.getId() == id) {
                 task.setStatus("in-progress");
-                task.setUpdatedAt(LocalDateTime.now());
                 break;
             }
         }

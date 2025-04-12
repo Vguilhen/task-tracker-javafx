@@ -65,18 +65,20 @@ public class TaskView extends Application {
         });
 
         editButton.setOnAction(e -> {
-            String selected = taskList.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                TextInputDialog dialog = new TextInputDialog(selected);
+            int index = taskList.getSelectionModel().getSelectedIndex();
+            if (index >= 0) {
+                Task task = controller.getAllTasks().get(index);
+                TextInputDialog dialog = new TextInputDialog(task.getDescription());
                 dialog.setTitle("Editar Tarefa");
                 dialog.setHeaderText(null);
                 dialog.setContentText("Nova descrição");
 
                 dialog.showAndWait().ifPresent(newDesc -> {
-                    int index = taskList.getSelectionModel().getSelectedIndex();
-                    Task task = controller.getAllTasks().get(index);
-                    controller.updateTask(task);
-                    taskList.getItems().set(index, newDesc);
+                    if (!newDesc.isEmpty() && !newDesc.equals(task.getDescription())) {
+                        task.setDescription(newDesc);//atualiza a descriição
+
+                        updateTaskList(taskList, sortBox.getValue());
+                    }
                 });
             }
         });
@@ -148,13 +150,15 @@ public class TaskView extends Application {
             default -> "❓";
         };
 
-        return String.format(
-                "%s %s\nCriado: %s | Editado: %s,",
-                icon,
-                task.getDescription(),
-                task.getCreatedAt().toLocalDate(),
-                task.getUpdatedAt().toLocalDate()
-        );
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s %s,", icon, task.getDescription()));
+        sb.append(String.format("\nCriado: %s", task.getCreatedAt().toLocalDate()));
+
+        if (!task.getCreatedAt().equals(task.getUpdatedAt())) {
+            sb.append(String.format(" | Editado: %s", task.getUpdatedAt().toLocalDate()));
+        }
+
+        return sb.toString();
     }
 
 
