@@ -28,6 +28,10 @@ public class TaskView extends Application {
         Button editButton = new Button("Editar");
         Button deleteButton = new Button("Excluir");
         Button markInProgressButton = new Button("Marcar como em andamento");
+        Button listAllButton = new Button("Listar todas");
+        Button listDoneButton = new Button("Tarefas concluídas");
+        Button listNotDoneButton = new Button("Tarefas não concluídas");
+        Button listInProgressButton = new Button("Tarefas em andamento");
         ComboBox<String> sortBox = new ComboBox<>();
         sortBox.getItems().addAll("Data de criação", "Última edição");
         sortBox.setValue("Data de criação");
@@ -49,7 +53,7 @@ public class TaskView extends Application {
 
 
                 controller.addTask(task); // Adiciona a tarefa no controlador
-                updateTaskList(taskList, sortBox.getValue()); // Atualiza a interface
+                updateTaskList(taskList, controller.getAllTasks(), sortBox.getValue()); // Atualiza a interface
                 taskInput.clear(); // Limpa o campo de texto
 
             }
@@ -78,7 +82,7 @@ public class TaskView extends Application {
                     if (!newDesc.isEmpty() && !newDesc.equals(task.getDescription())) {
                         task.setDescription(newDesc);//atualiza a descriição
 
-                        updateTaskList(taskList, sortBox.getValue());
+                        updateTaskList(taskList, controller.getAllTasks(), sortBox.getValue());
                     }
                 });
             }
@@ -98,11 +102,17 @@ public class TaskView extends Application {
             if (selectedIndex != -1) {
                 Task task = controller.getAllTasks().get(selectedIndex);
                 controller.markInProgress(task.getId());
-                updateTaskList(taskList, sortBox.getValue());
+                updateTaskList(taskList, controller.getAllTasks(), sortBox.getValue());
             }
         });
 
-        sortBox.setOnAction(e -> updateTaskList(taskList, sortBox.getValue()));
+        listAllButton.setOnAction(e -> updateTaskList(taskList, controller.getAllTasks(), sortBox.getValue()));
+        listDoneButton.setOnAction(e -> updateTaskList(taskList, controller.getTasksByStatus("done"), sortBox.getValue()));
+        listNotDoneButton.setOnAction(e -> updateTaskList(taskList, controller.getTasksNotDone(), sortBox.getValue()));
+        listInProgressButton.setOnAction(e -> updateTaskList(taskList, controller.getTasksByStatus("in-progress"), sortBox.getValue()));
+
+
+        sortBox.setOnAction(e -> updateTaskList(taskList, controller.getAllTasks(), sortBox.getValue()));
 
         // Adiciona todos os elementos ao layout
         root.getChildren().addAll(
@@ -114,6 +124,10 @@ public class TaskView extends Application {
                 completeButton,
                 editButton,
                 deleteButton,
+                listAllButton,
+                listDoneButton,
+                listNotDoneButton,
+                listInProgressButton,
                 sortBox,
                 taskList
         );
@@ -128,17 +142,18 @@ public class TaskView extends Application {
 
     }
 
-    private void updateTaskList(ListView<String> taskList, String sortBy) {
+    private void updateTaskList(ListView<String> taskList, List<Task> tasks, String sortBy) {
         taskList.getItems().clear();
 
-        List<Task> sortdTasks = new ArrayList<>(controller.getAllTasks());
+        List<Task> sortedTasks = new ArrayList<>(tasks);
 
         if (sortBy.equals("Data de criação")) {
-            sortdTasks.sort(Comparator.comparing(Task::getCreatedAt));
+            sortedTasks.sort(Comparator.comparing(Task::getUpdatedAt));
         } else if (sortBy.equals("Última edição")) {
-            sortdTasks.sort(Comparator.comparing(Task::getUpdatedAt).reversed());
+            sortedTasks.sort(Comparator.comparing(Task::getUpdatedAt).reversed());
         }
-        for (Task task : sortdTasks) {
+
+        for (Task task : tasks) {
             taskList.getItems().add(formatTask(task));
         }
     }

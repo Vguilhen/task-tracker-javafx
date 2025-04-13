@@ -44,6 +44,26 @@ public class TaskController {
         }
     }
 
+    public List<Task> getTasksByStatus(String status) {
+        List<Task> filtered = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getStatus().equalsIgnoreCase(status)) {
+                filtered.add(task);
+            }
+        }
+        return filtered;
+    }
+
+    public List<Task> getTasksNotDone() {
+        List<Task> filtered = new ArrayList<>();
+        for (Task task : tasks) {
+            if (!task.getStatus().equalsIgnoreCase("done")) {
+                filtered.add(task);
+            }
+        }
+        return filtered;
+    }
+
     public void deleteTask(int id) {
         tasks.removeIf(task -> task.getId() == id);
     }
