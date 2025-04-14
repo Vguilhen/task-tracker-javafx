@@ -1,11 +1,13 @@
 package br.com.project.tasktracker.controller;
 
 import br.com.project.tasktracker.model.Task;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controlador responsável por gerenciar a lista de tarefas.
+ */
 public class TaskController {
     private List<Task> tasks = new ArrayList<>();
 
@@ -54,6 +56,10 @@ public class TaskController {
         return filtered;
     }
 
+    public void deleteTask(int id) {
+        tasks.removeIf(task -> task.getId() == id);
+    }
+
     public List<Task> getTasksNotDone() {
         List<Task> filtered = new ArrayList<>();
         for (Task task : tasks) {
@@ -64,7 +70,5 @@ public class TaskController {
         return filtered;
     }
 
-    public void deleteTask(int id) {
-        tasks.removeIf(task -> task.getId() == id);
-    }
+
 }
