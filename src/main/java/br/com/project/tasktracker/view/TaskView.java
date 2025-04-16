@@ -37,7 +37,9 @@ public class TaskView extends Application {
 
         root.getChildren().addAll(todoColumn, doingColumn, doneColumn);
 
-        Scene scene = new Scene(root, 800, 400);
+        Scene scene = new Scene(root, 900, 500);
+        scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+
         primaryStage.setTitle("Task Tracker");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -54,16 +56,19 @@ public class TaskView extends Application {
      */
     private void setupColumn(VBox column, String title, String status) {
         column.setPadding(new Insets(10));
-        column.setStyle("-fx-border-color: lightgray; -fx-background-color: #f9f9f9; -fx-border-radius: 8; -fx-background-radius: 8;");
-        column.setPrefWidth(250);
+        column.setPadding((new Insets(10)));
+        column.setPrefWidth(280);
+        column.setStyle("-fx-background-color: #f0f4f8; -fx-background-radius: 10; -fx-border-color: #d0d0d0; -fx-border-radius: 10;");
 
         Label header = new Label(title);
-        header.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        header.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2c3e50;");
 
         TextField input = new TextField();
         input.setPromptText("Nova tarefa...");
 
-        Button addButton = new Button("Adicionar");
+        Button addButton = new Button("➕ Adicionar");
+        addButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white;");;
+
         addButton.setOnAction(e -> {
             String desc = input.getText().trim();
             if (!desc.isEmpty() && status.equals("todo")) {
@@ -106,33 +111,52 @@ public class TaskView extends Application {
         // Remove todos os nós exceto o título e botões de adicionar (índices 0 a 2 se for "todo")
         column.getChildren().removeIf(node -> VBox.getMargin(node) != null);
 
+
         for (Task task : tasks) {
-            VBox taskCard = new VBox();
+            VBox taskCard = new VBox(5);
             taskCard.setPadding(new Insets(5));
-            taskCard.setStyle("-fx-background-color: white; -fx-border-color: #ccc; -fx-background-radius: 5; -fx-border-radius: 5;");
+            taskCard.setStyle("-fx-background-color: white; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-radius: 5; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);");
 
             Label desc = new Label(task.getDescription());
             desc.setWrapText(true);
+            desc.setStyle("-fx-font-size: 14px; -fx-text-fill: #2c3e50;");
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             Label timestamp = new Label("Criado: " + task.getCreatedAt().format(formatter));
+            timestamp.setStyle("-fx-font-size: 11px; -fx-text-fill: gray;");
 
-            Button moveButton = new Button();
+            HBox buttonBox = new HBox(5);
+
             if (status.equals("todo")) {
+                Button moveButton = new Button();
                 moveButton.setText("➡ Em andamento");
+                moveButton.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white;");
+                moveButton.setMinWidth(130);
+                moveButton.setMaxWidth(Double.MAX_VALUE);
+                HBox.setHgrow(moveButton, Priority.ALWAYS);
                 moveButton.setOnAction(e -> {
                     controller.markInProgress(task.getId());
                     updateAllColumns();
                 });
+                buttonBox.getChildren().add(moveButton);
             } else if (status.equals("in-progress")) {
-                moveButton.setText("✔ Concluir");
+                Button moveButton = new Button("✔ Concluir");
+                moveButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white;");
+                moveButton.setMinWidth(100);
+                moveButton.setMaxWidth(Double.MAX_VALUE);
+                HBox.setHgrow(moveButton, Priority.ALWAYS);
                 moveButton.setOnAction(e -> {
                     controller.markTaskDone(task.getId());
                     updateAllColumns();
                 });
+                buttonBox.getChildren().add(moveButton);
             }
 
             Button editButton = new Button("✏️ Editar");
+            editButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
+            editButton.setMinWidth(100);
+            editButton.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(editButton, Priority.ALWAYS);
             editButton.setOnAction(e -> {
                 TextInputDialog dialog = new TextInputDialog(task.getDescription());
                 dialog.setTitle("Editar Tarefa");
@@ -149,15 +173,19 @@ public class TaskView extends Application {
             });
 
             Button deleteButton = new Button("🗑 Excluir");
+            deleteButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
+            deleteButton.setMinWidth(100);
+            deleteButton.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(deleteButton, Priority.ALWAYS);
             deleteButton.setOnAction(e -> {
                 controller.deleteTask(task.getId());
                 updateAllColumns();
             });
 
-            taskCard.getChildren().addAll(desc, timestamp);
-            if (!status.equals("done")) taskCard.getChildren().addAll(moveButton, editButton);
-            taskCard.getChildren().add(deleteButton);
+            if (!status.equals("done")) buttonBox.getChildren().add(editButton);
+            buttonBox.getChildren().add(deleteButton);
 
+            taskCard.getChildren().addAll(desc, timestamp, buttonBox);
             VBox.setMargin(taskCard, new Insets(5, 0, 5, 0));
             column.getChildren().add(taskCard);
         }
