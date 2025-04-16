@@ -63,14 +63,9 @@ public class TaskController {
         TaskStorage.saveTasks(tasks);
     }
 
-
-
-
-
-
-
     public void deleteTask(int id) {
         tasks.removeIf(task -> task.getId() == id);
+        TaskStorage.saveTasks(tasks);
     }
 
     public List<Task> getTasksNotDone() {
